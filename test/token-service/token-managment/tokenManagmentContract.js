@@ -37,6 +37,47 @@ describe('TokenManagmentContract Test Suite', function () {
   let tokenQueryContractAddress;
   let tokenManagementContractAddress;
 
+  /**
+   * Asserts that a Hedera Token Service (HTS) transaction reverts and matches a specific HTS error string.
+   *
+   * @param {import('ethers').TransactionResponse} transaction - Tx object returned by a contract call.
+   * @param {string} expectedError - ASCII HTS error identifier to match.
+   * @param {string} expectedResponseCode - String containing response code string.
+   * @returns {Promise<void>} Resolves when the assertion is completed.
+   */
+  const expectHTSError = async (
+    transaction,
+    expectedError,
+    expectedResponseCode,
+  ) => {
+    await expect(transaction.wait()).to.eventually.be.rejected;
+
+    const encodedResponse = await utils.getHTSResponseCode(transaction.hash);
+    const responseCode = utils.hexToASCII(BigInt(encodedResponse).toString(16));
+    expect(responseCode).to.equal(expectedError);
+
+    const revertReason = await utils.getRevertReasonFromReceipt(
+      transaction.hash,
+    );
+    const decodeRevertReason = utils.decodeErrorMessage(revertReason);
+
+    // @todo Remove the code below once the consensus node issue is resolved.
+    // See referenced task: https://github.com/hiero-ledger/hiero-consensus-node/issues/2377
+    //
+    // The response code from `contracts/results/{txId}` (`error_message`, via getRevertReasonFromReceipt)
+    // should match the error from `contracts/results/{txId}/actions` (`revert_reason`, via getHTSResponseCode).
+    // Currently, this is not the case for the revert reason `CUSTOM_FEES_LIST_TOO_LONG`.
+    // Instead of the expected 232, we are receiving 21.
+    // Code below allows both values as a temporary workaround and ensures the test
+    // passes immediately once the consensus node issue is resolved, even before this logic is removed.
+    if (expectedResponseCode === CUSTOM_FEES_LIST_TOO_LONG) {
+      expect(decodeRevertReason).to.be.oneOf([expectedResponseCode, '21']);
+      return;
+    }
+
+    expect(decodeRevertReason).to.be.equal(expectedResponseCode);
+  };
+
   before(async function () {
     signers = await ethers.getSigners();
     tokenCreateContract = await utils.deployTokenCreateContract();
@@ -2700,7 +2741,7 @@ describe('TokenManagmentContract Test Suite', function () {
       );
     });
 
-    xit('should be able to update fixed HTS fee for NFT', async function () {
+    it('should be able to update fixed HTS fee for NFT', async function () {
       await utils.associateToken(
         tokenCreateCustomContract,
         feeToken,
@@ -2811,6 +2852,7 @@ describe('TokenManagmentContract Test Suite', function () {
           signers[1].address,
           signers[3].address,
           nftTx,
+          Constants.GAS_LIMIT_1_000_000,
         );
       await transferNftToSigner3.wait();
       expect(await hapi.getTokenBalance(signers[1].address, feeToken)).to.equal(
@@ -2822,7 +2864,7 @@ describe('TokenManagmentContract Test Suite', function () {
       expect(await hapi.getTokenBalance(signers[3].address, nft)).to.equal(1);
     });
 
-    xit('should be able to update fixed HTS fee and royalty fee in NFT', async function () {
+    it('should be able to update fixed HTS fee and royalty fee in NFT', async function () {
       await utils.associateToken(
         tokenCreateCustomContract,
         feeToken,
@@ -2975,6 +3017,7 @@ describe('TokenManagmentContract Test Suite', function () {
           signers[1].address,
           signers[3].address,
           nftTx,
+          Constants.GAS_LIMIT_1_000_000,
         );
       await transferNftToSigner3.wait();
 
@@ -3222,12 +3265,7 @@ describe('TokenManagmentContract Test Suite', function () {
         ).to.eventually.be.rejectedWith(new RegExp(FRACTION_DIVIDES_BY_ZERO));
       });
 
-      // Note: Tests below are skipped due to CUSTOM_FEES_LIST_TOO_LONG error introduced in network node v0.56.0
-      // which enforces a maximum of 10 custom fees per token. This validation was previously done at the SDK level.
-      // TODO: Re-enable tests once validation is properly handled - see https://github.com/hashgraph/hedera-services/issues/17533
-      // and https://github.com/hashgraph/hedera-smart-contracts/issues/1207
-      it.skip('should fail when updating fungible token fees to more than 10', async function () {
-        let transactionHash;
+      it('should fail when updating fungible token fees to more than 10', async function () {
         tokenWithFees = await utils.createFungibleTokenWithCustomFeesAndKeys(
           tokenCreateCustomContract,
           signers[0].address,
@@ -3254,24 +3292,16 @@ describe('TokenManagmentContract Test Suite', function () {
             tokenWithFees,
             fees,
             [],
+            Constants.GAS_LIMIT_5_000_000,
           );
-        try {
-          await updateFeeTx.wait();
-        } catch (error) {
-          transactionHash = error.receipt.hash;
-        }
-
-        const revertReason =
-          await utils.getRevertReasonFromReceipt(transactionHash);
-        const decodeRevertReason = utils.decodeErrorMessage(revertReason);
-        expect(decodeRevertReason).to.equal(CUSTOM_FEES_LIST_TOO_LONG);
+        await expectHTSError(
+          updateFeeTx,
+          'CUSTOM_FEES_LIST_TOO_LONG',
+          CUSTOM_FEES_LIST_TOO_LONG,
+        );
       });
 
-      // Note: Tests below are skipped due to CUSTOM_FEES_LIST_TOO_LONG error introduced in network node v0.56.0
-      // which enforces a maximum of 10 custom fees per token. This validation was previously done at the SDK level.
-      // TODO: Re-enable tests once validation is properly handled - see https://github.com/hashgraph/hedera-services/issues/17533
-      // and https://github.com/hashgraph/hedera-smart-contracts/issues/1207
-      it.skip('should fail when updating NFT token fees to more than 10', async function () {
+      it('should fail when updating NFT token fees to more than 10', async function () {
         const nft =
           await utils.createNonFungibleTokenWithCustomRoyaltyFeeAndKeys(
             tokenCreateCustomContract,
@@ -3281,8 +3311,6 @@ describe('TokenManagmentContract Test Suite', function () {
             keys,
           );
         await hapi.updateTokenKeys(nft, [tokenManagementContractAddress]);
-
-        let transactionHash;
         const fees = [];
         for (let i = 0; i < 11; i++) {
           fees.push({
@@ -3298,17 +3326,13 @@ describe('TokenManagmentContract Test Suite', function () {
             nft,
             fees,
             [],
+            Constants.GAS_LIMIT_5_000_000,
           );
-        try {
-          await updateFeeTx.wait();
-        } catch (error) {
-          transactionHash = error.receipt.hash;
-        }
-
-        const revertReason =
-          await utils.getRevertReasonFromReceipt(transactionHash);
-        const decodeRevertReason = utils.decodeErrorMessage(revertReason);
-        expect(decodeRevertReason).to.equal(CUSTOM_FEES_LIST_TOO_LONG);
+        await expectHTSError(
+          updateFeeTx,
+          'CUSTOM_FEES_LIST_TOO_LONG',
+          CUSTOM_FEES_LIST_TOO_LONG,
+        );
       });
 
       it('should fail when the provided fee collector is invalid', async function () {
