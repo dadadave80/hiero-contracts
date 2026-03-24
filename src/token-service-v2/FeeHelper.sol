@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
-import "./IHederaTokenService.sol";
+
+import {IHederaTokenService} from "hiero-contracts/token-service-v2/IHederaTokenService.sol";
 
 abstract contract FeeHelper {
     function createFixedHbarFee(int64 amount, address feeCollector)

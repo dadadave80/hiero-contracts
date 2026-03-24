@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./SafeHTS.sol";
+import {SafeHTS, HederaResponseCodes, IHederaTokenService} from "hiero-contracts/token-service/safe-hts/SafeHTS.sol";
 
 contract SafeOperations is SafeHTS {
     bool finiteTotalSupplyType = true;

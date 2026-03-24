@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.4.9 <0.9.0;
-
-import "../../schedule-service/HederaScheduleService.sol";
-import "../../token-service/HederaTokenService.sol";
-
 pragma experimental ABIEncoderV2;
+
+import {HederaScheduleService, HederaResponseCodes} from "hiero-contracts/schedule-service/HederaScheduleService.sol";
 
 contract HRC755Contract is HederaScheduleService {
     /// Authorizes the calling contract as a signer to the schedule transaction.

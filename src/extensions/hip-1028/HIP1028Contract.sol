@@ -2,10 +2,10 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../token-service-v2/HederaResponseCodes.sol";
-import "../../token-service-v2/HederaTokenService.sol";
-import "../../token-service-v2/KeyHelper.sol";
-import "../../token-service-v2/FeeHelper.sol";
+import {HederaResponseCodes} from "hiero-contracts/token-service-v2/HederaResponseCodes.sol";
+import {HederaTokenService, IHederaTokenService} from "hiero-contracts/token-service-v2/HederaTokenService.sol";
+import {KeyHelper} from "hiero-contracts/token-service-v2/KeyHelper.sol";
+import {FeeHelper} from "hiero-contracts/token-service-v2/FeeHelper.sol";
 
 contract HIP1028Contract is HederaTokenService, KeyHelper, FeeHelper {
     event TokenAddress(address);
@@ -263,7 +263,7 @@ contract HIP1028Contract is HederaTokenService, KeyHelper, FeeHelper {
         IHederaTokenService.HederaToken memory tokenInfo;
         tokenInfo.metadata = bytes(metadata);
 
-        (int256 responseCode) = HederaTokenService.updateTokenInfo(token, tokenInfo);
+        int256 responseCode = HederaTokenService.updateTokenInfo(token, tokenInfo);
 
         if (responseCode != HederaResponseCodes.SUCCESS) {
             revert();
@@ -274,7 +274,7 @@ contract HIP1028Contract is HederaTokenService, KeyHelper, FeeHelper {
         IHederaTokenService.TokenKey[] memory keys = new IHederaTokenService.TokenKey[](1);
         keys[0] = getSingleKey(KeyType.METADATA, KeyValueType.CONTRACT_ID, contractID);
 
-        (int256 responseCode) = HederaTokenService.updateTokenKeys(token, keys);
+        int256 responseCode = HederaTokenService.updateTokenKeys(token, keys);
 
         if (responseCode != HederaResponseCodes.SUCCESS) {
             revert();

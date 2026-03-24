@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./SelfFunding.sol";
+import {SelfFunding} from "hiero-contracts/exchange-rate/SelfFunding.sol";
 
 contract ExchangeRateSystemContract is SelfFunding {
     // The USD in cents that must be sent as msg.value

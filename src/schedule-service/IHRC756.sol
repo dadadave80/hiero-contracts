@@ -2,7 +2,7 @@
 pragma solidity >=0.4.9 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./IHederaScheduleService.sol";
+import {IHederaScheduleService, IHederaTokenService} from "hiero-contracts/schedule-service/IHederaScheduleService.sol";
 
 interface IHRC756 is IHederaScheduleService {
     /// Allows for the creation of a schedule transaction for given a system contract address, abi encoded call data and payer address

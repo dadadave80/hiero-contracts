@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./IPrngSystemContract.sol";
+import {IPrngSystemContract} from "hiero-contracts/prng/IPrngSystemContract.sol";
 
 contract PrngSystemContract {
     event PseudoRandomSeed(bytes32 seedBytes);

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.9 <0.9.0;
 
-import "../../schedule-service/HederaScheduleService.sol";
-import "../../schedule-service/IHRC1215ScheduleFacade.sol";
+import {HederaScheduleService, HederaResponseCodes} from "hiero-contracts/schedule-service/HederaScheduleService.sol";
+import {IHRC1215ScheduleFacade} from "hiero-contracts/schedule-service/IHRC1215ScheduleFacade.sol";
 
 contract HRC1215Contract is HederaScheduleService {
     constructor() payable {}

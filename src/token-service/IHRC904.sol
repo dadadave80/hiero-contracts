@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.4.9 <0.9.0;
 
-import "./IHTSStructs.sol";
+import {IHTSStructs} from "hiero-contracts/token-service/IHTSStructs.sol";
 
 interface IHRC904 is IHTSStructs {
     /// @notice Airdrop one or more tokens to one or more accounts

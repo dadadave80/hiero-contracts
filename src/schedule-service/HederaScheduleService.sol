@@ -2,10 +2,10 @@
 pragma solidity >=0.4.9 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../common/HederaResponseCodes.sol";
-import "./IHRC755.sol";
-import "./IHRC756.sol";
-import "./IHRC1215.sol";
+import {HederaResponseCodes} from "hiero-contracts/common/HederaResponseCodes.sol";
+import {IHRC755, IHederaScheduleService} from "hiero-contracts/schedule-service/IHRC755.sol";
+import {IHRC756, IHederaTokenService} from "hiero-contracts/schedule-service/IHRC756.sol";
+import {IHRC1215} from "hiero-contracts/schedule-service/IHRC1215.sol";
 
 abstract contract HederaScheduleService is IHederaScheduleService {
     address constant HSS = address(0x16b);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "../../account-service/HederaAccountService.sol";
+import {HederaAccountService, HederaResponseCodes} from "hiero-contracts/account-service/HederaAccountService.sol";
 
 contract AliasAccountUtility is HederaAccountService {
     event ResponseCode(int256 responseCode);

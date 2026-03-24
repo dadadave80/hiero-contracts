@@ -2,10 +2,14 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../../token-service/HederaTokenService.sol";
-import "../../token-service/ExpiryHelper.sol";
-import "../../token-service/KeyHelper.sol";
-import "../../token-service/FeeHelper.sol";
+import {
+    HederaTokenService,
+    IHederaTokenService,
+    HederaResponseCodes
+} from "hiero-contracts/token-service/HederaTokenService.sol";
+import {ExpiryHelper} from "hiero-contracts/token-service/ExpiryHelper.sol";
+import {KeyHelper} from "hiero-contracts/token-service/KeyHelper.sol";
+import {FeeHelper} from "hiero-contracts/token-service/FeeHelper.sol";
 
 contract TokenCreateCustomContract is HederaTokenService, ExpiryHelper, KeyHelper, FeeHelper {
     bool finiteTotalSupplyType = true;

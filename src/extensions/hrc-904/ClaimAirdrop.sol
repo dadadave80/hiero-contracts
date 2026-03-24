@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.5.0 <0.9.0;
-
-import {HederaResponseCodes} from "../../common/HederaResponseCodes.sol";
-import {HederaTokenService} from "../../token-service/HederaTokenService.sol";
-import {IHederaTokenService} from "../../token-service/IHederaTokenService.sol";
 pragma experimental ABIEncoderV2;
+
+import {HederaResponseCodes} from "hiero-contracts/common/HederaResponseCodes.sol";
+import {HederaTokenService, IHederaTokenService} from "hiero-contracts/token-service/HederaTokenService.sol";
 
 // @title Claim Airdrop Contract
 // @notice Facilitates claiming of pending token airdrops on the Hedera network

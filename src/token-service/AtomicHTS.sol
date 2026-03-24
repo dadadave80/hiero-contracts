@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.20;
 
-import "./IHRC719.sol";
-import "./HederaTokenService.sol";
-import "./IHederaTokenService.sol";
+import {HederaTokenService, HederaResponseCodes} from "hiero-contracts/token-service/HederaTokenService.sol";
 
 /**
  * @dev This contract contains multiple examples highlighting the utilization of the
@@ -51,7 +49,7 @@ contract AtomicHTS is HederaTokenService {
      * - associateToken() -> grantTokenKYC() -> transferToken()
      */
     function batchAssociateGrantKYCTransfer(address token, address sender, address receiver, int64 amount) external {
-        (int256 associateResponseCode) = HederaTokenService.associateToken(receiver, token);
+        int256 associateResponseCode = HederaTokenService.associateToken(receiver, token);
         require(
             associateResponseCode == HederaResponseCodes.SUCCESS
                 || associateResponseCode == HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT,
@@ -59,10 +57,10 @@ contract AtomicHTS is HederaTokenService {
         );
 
         /// @notice an account needs to be granted the KYC of the HTS token for it to receive the token
-        (int256 grantKYCResponseCode) = HederaTokenService.grantTokenKyc(token, receiver);
+        int256 grantKYCResponseCode = HederaTokenService.grantTokenKyc(token, receiver);
         require(grantKYCResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, sender, receiver, amount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, sender, receiver, amount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
         emit BatchAssociateGrantKYCTransfer(associateResponseCode, grantKYCResponseCode, transferTokenResponseCode);
@@ -88,35 +86,35 @@ contract AtomicHTS is HederaTokenService {
         /// top up the spender with initial fund
         /// @notice it is necessary for the spender to be associated and granted token KYC to receive fund.
         address spender = address(this);
-        (int256 associateContractResponseCode) = HederaTokenService.associateToken(spender, token);
+        int256 associateContractResponseCode = HederaTokenService.associateToken(spender, token);
         require(
             associateContractResponseCode == HederaResponseCodes.SUCCESS
                 || associateContractResponseCode == HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT,
             "Failed to associate token."
         );
 
-        (int256 grantKYCContractResponseCode) = HederaTokenService.grantTokenKyc(token, spender);
+        int256 grantKYCContractResponseCode = HederaTokenService.grantTokenKyc(token, spender);
         require(grantKYCContractResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, owner, spender, transferAmount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, owner, spender, transferAmount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
         /// main logics
 
-        (int256 approveResponseCode) = HederaTokenService.approve(token, spender, allowance);
+        int256 approveResponseCode = HederaTokenService.approve(token, spender, allowance);
         require(approveResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token allowance.");
 
-        (int256 associateResponseCode) = HederaTokenService.associateToken(receipient, token);
+        int256 associateResponseCode = HederaTokenService.associateToken(receipient, token);
         require(
             associateResponseCode == HederaResponseCodes.SUCCESS
                 || associateResponseCode == HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT,
             "Failed to associate token."
         );
 
-        (int256 grantKYCResponseCode) = HederaTokenService.grantTokenKyc(token, receipient);
+        int256 grantKYCResponseCode = HederaTokenService.grantTokenKyc(token, receipient);
         require(grantKYCResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferFromResponseCode) = this.transferFrom(token, spender, receipient, allowance);
+        int256 transferFromResponseCode = this.transferFrom(token, spender, receipient, allowance);
         require(transferFromResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
         emit BatchApproveAssociateGrantKYCTransferFrom(
@@ -135,16 +133,16 @@ contract AtomicHTS is HederaTokenService {
     function batchUnfreezeGrantKYCTransferFreeze(address token, address sender, address receiver, int64 amount)
         external
     {
-        (int256 unfreezeTokenResponseCode) = HederaTokenService.unfreezeToken(token, receiver);
+        int256 unfreezeTokenResponseCode = HederaTokenService.unfreezeToken(token, receiver);
         require(unfreezeTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to unfreeze token.");
 
-        (int256 grantKYCResponseCode) = HederaTokenService.grantTokenKyc(token, receiver);
+        int256 grantKYCResponseCode = HederaTokenService.grantTokenKyc(token, receiver);
         require(grantKYCResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, sender, receiver, amount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, sender, receiver, amount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
-        (int256 freezeTokenResponseCode) = HederaTokenService.freezeToken(token, receiver);
+        int256 freezeTokenResponseCode = HederaTokenService.freezeToken(token, receiver);
         require(freezeTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to freeze token.");
 
         emit BatchUnfreezeGrantKYCTransferFreeze(
@@ -165,13 +163,13 @@ contract AtomicHTS is HederaTokenService {
         int64 transferAmount
     ) external {
         bytes[] memory metadata;
-        (int256 wipeTokenResponseCode) = HederaTokenService.wipeTokenAccount(token, owner, wipedAmount);
+        int256 wipeTokenResponseCode = HederaTokenService.wipeTokenAccount(token, owner, wipedAmount);
         require(wipeTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to wipe token.");
 
         (int256 mintTokenResponseCode,,) = HederaTokenService.mintToken(token, mintAmount, metadata);
         require(mintTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to mint token.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, treasury, owner, transferAmount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, treasury, owner, transferAmount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
         emit BatchWipeMintTransfer(wipeTokenResponseCode, mintTokenResponseCode, transferTokenResponseCode);
@@ -192,16 +190,16 @@ contract AtomicHTS is HederaTokenService {
         (int256 mintTokenResponseCode,,) = HederaTokenService.mintToken(token, mintAmount, metadata);
         require(mintTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to mint token.");
 
-        (int256 unfreezeTokenResponseCode) = HederaTokenService.unfreezeToken(token, receiver);
+        int256 unfreezeTokenResponseCode = HederaTokenService.unfreezeToken(token, receiver);
         require(unfreezeTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to unfreeze token.");
 
-        (int256 grantKYCResponseCode) = HederaTokenService.grantTokenKyc(token, receiver);
+        int256 grantKYCResponseCode = HederaTokenService.grantTokenKyc(token, receiver);
         require(grantKYCResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, sender, receiver, transferAmount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, sender, receiver, transferAmount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
-        (int256 freezeTokenResponseCode) = HederaTokenService.freezeToken(token, receiver);
+        int256 freezeTokenResponseCode = HederaTokenService.freezeToken(token, receiver);
         require(freezeTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to freeze token.");
 
         emit BatchMintUnfreezeGrantKYCTransferFreeze(
@@ -214,7 +212,7 @@ contract AtomicHTS is HederaTokenService {
      * - associateToken() -> mintToken() -> grantTokenKyc() -> transferToken()
      */
     function batchAssociateMintGrantTransfer(address token, address sender, address receiver, int64 amount) external {
-        (int256 associateResponseCode) = HederaTokenService.associateToken(receiver, token);
+        int256 associateResponseCode = HederaTokenService.associateToken(receiver, token);
         require(
             associateResponseCode == HederaResponseCodes.SUCCESS
                 || associateResponseCode == HederaResponseCodes.TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT,
@@ -225,10 +223,10 @@ contract AtomicHTS is HederaTokenService {
         (int256 mintTokenResponseCode,,) = HederaTokenService.mintToken(token, amount, metadata);
         require(mintTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to mint token.");
 
-        (int256 grantKYCResponseCode) = HederaTokenService.grantTokenKyc(token, receiver);
+        int256 grantKYCResponseCode = HederaTokenService.grantTokenKyc(token, receiver);
         require(grantKYCResponseCode == HederaResponseCodes.SUCCESS, "Failed to grant token KYC.");
 
-        (int256 transferTokenResponseCode) = HederaTokenService.transferToken(token, sender, receiver, amount);
+        int256 transferTokenResponseCode = HederaTokenService.transferToken(token, sender, receiver, amount);
         require(transferTokenResponseCode == HederaResponseCodes.SUCCESS, "Failed to transfer token.");
 
         emit BatchAssociateMintGrantTransfer(

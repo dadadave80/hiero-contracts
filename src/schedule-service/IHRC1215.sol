@@ -2,7 +2,7 @@
 pragma solidity >=0.4.9 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./IHederaScheduleService.sol";
+import {IHederaScheduleService} from "hiero-contracts/schedule-service/IHederaScheduleService.sol";
 
 interface IHRC1215 is IHederaScheduleService {
     /// Allows for the creation of a schedule transaction to schedule any contract call for a given smart contract

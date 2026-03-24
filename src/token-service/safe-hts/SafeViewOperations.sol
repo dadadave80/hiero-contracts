@@ -2,7 +2,7 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./SafeViewHTS.sol";
+import {SafeViewHTS, IHederaTokenService} from "hiero-contracts/token-service/safe-hts/SafeViewHTS.sol";
 
 contract SafeViewOperations is SafeViewHTS {
     event Allowance(uint256);

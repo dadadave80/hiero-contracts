@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.5.0 <0.9.0;
 
-import "./IExchangeRate.sol";
+import {IExchangeRate} from "hiero-contracts/exchange-rate/IExchangeRate.sol";
 
 abstract contract SelfFunding {
     uint256 constant TINY_PARTS_PER_WHOLE = 100_000_000;

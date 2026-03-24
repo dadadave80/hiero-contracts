@@ -2,7 +2,7 @@
 pragma solidity >=0.4.9 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "./IHederaScheduleService.sol";
+import {IHederaScheduleService} from "hiero-contracts/schedule-service/IHederaScheduleService.sol";
 
 interface IHRC755 is IHederaScheduleService {
     /// Authorizes the calling contract as a signer to the schedule transaction.

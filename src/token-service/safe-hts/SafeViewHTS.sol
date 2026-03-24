@@ -2,8 +2,8 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../IHederaTokenService.sol";
-import "../../common/HederaResponseCodes.sol";
+import {IHederaTokenService} from "hiero-contracts/token-service/IHederaTokenService.sol";
+import {HederaResponseCodes} from "hiero-contracts/common/HederaResponseCodes.sol";
 
 abstract contract SafeViewHTS {
     address constant precompileAddress = address(0x167);
@@ -32,7 +32,9 @@ abstract contract SafeViewHTS {
             abi.encodeWithSelector(IHederaTokenService.allowance.selector, token, owner, spender)
         );
         (responseCode, allowance) = success ? abi.decode(result, (int32, uint256)) : (HederaResponseCodes.UNKNOWN, 0);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert AllowanceFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert AllowanceFailed();
+        }
     }
 
     function safeGetApproved(address token, int64 serialNumber) internal returns (address approved) {
@@ -42,7 +44,9 @@ abstract contract SafeViewHTS {
         );
         (responseCode, approved) =
             success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetApprovedFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetApprovedFailed();
+        }
     }
 
     function safeIsApprovedForAll(address token, address owner, address operator) internal returns (bool approved) {
@@ -51,7 +55,9 @@ abstract contract SafeViewHTS {
             abi.encodeWithSelector(IHederaTokenService.isApprovedForAll.selector, token, owner, operator)
         );
         (responseCode, approved) = success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert IsApprovedForAllFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert IsApprovedForAllFailed();
+        }
     }
 
     function safeIsFrozen(address token, address account) internal returns (bool frozen) {
@@ -59,7 +65,9 @@ abstract contract SafeViewHTS {
         (bool success, bytes memory result) =
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.isFrozen.selector, token, account));
         (responseCode, frozen) = success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert IsFrozenFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert IsFrozenFailed();
+        }
     }
 
     function safeIsKyc(address token, address account) internal returns (bool kycGranted) {
@@ -67,7 +75,9 @@ abstract contract SafeViewHTS {
         (bool success, bytes memory result) =
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.isKyc.selector, token, account));
         (responseCode, kycGranted) = success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert IsKYCGrantedFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert IsKYCGrantedFailed();
+        }
     }
 
     function safeGetTokenCustomFees(address token)
@@ -92,7 +102,9 @@ abstract contract SafeViewHTS {
                 )
             )
             : (HederaResponseCodes.UNKNOWN, fixedFees, fractionalFees, royaltyFees);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenCustomFeesFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenCustomFeesFailed();
+        }
     }
 
     function safeGetTokenDefaultFreezeStatus(address token) internal returns (bool defaultFreezeStatus) {
@@ -102,7 +114,9 @@ abstract contract SafeViewHTS {
         );
         (responseCode, defaultFreezeStatus) =
             success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenDefaultFreezeStatusFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenDefaultFreezeStatusFailed();
+        }
     }
 
     function safeGetTokenDefaultKycStatus(address token) internal returns (bool defaultKycStatus) {
@@ -111,7 +125,9 @@ abstract contract SafeViewHTS {
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.getTokenDefaultKycStatus.selector, token));
         (responseCode, defaultKycStatus) =
             success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenDefaultKYCStatusFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenDefaultKYCStatusFailed();
+        }
     }
 
     function safeGetTokenExpiryInfo(address token) internal returns (IHederaTokenService.Expiry memory expiry) {
@@ -120,7 +136,9 @@ abstract contract SafeViewHTS {
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.getTokenExpiryInfo.selector, token));
         (responseCode, expiry) =
             success ? abi.decode(result, (int32, IHederaTokenService.Expiry)) : (HederaResponseCodes.UNKNOWN, expiry);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenExpiryInfoFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenExpiryInfoFailed();
+        }
     }
 
     function safeGetFungibleTokenInfo(address token)
@@ -133,7 +151,9 @@ abstract contract SafeViewHTS {
         (responseCode, fungibleTokenInfo) = success
             ? abi.decode(result, (int32, IHederaTokenService.FungibleTokenInfo))
             : (HederaResponseCodes.UNKNOWN, fungibleTokenInfo);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetFungibleTokenInfoFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetFungibleTokenInfoFailed();
+        }
     }
 
     function safeGetTokenInfo(address token) internal returns (IHederaTokenService.TokenInfo memory tokenInfo) {
@@ -143,7 +163,9 @@ abstract contract SafeViewHTS {
         (responseCode, tokenInfo) = success
             ? abi.decode(result, (int32, IHederaTokenService.TokenInfo))
             : (HederaResponseCodes.UNKNOWN, tokenInfo);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenInfoFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenInfoFailed();
+        }
     }
 
     function safeGetTokenKey(address token, uint256 keyType)
@@ -155,7 +177,9 @@ abstract contract SafeViewHTS {
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.getTokenKey.selector, token, keyType));
         (responseCode, key) =
             success ? abi.decode(result, (int32, IHederaTokenService.KeyValue)) : (HederaResponseCodes.UNKNOWN, key);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenKeyFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenKeyFailed();
+        }
     }
 
     function safeGetNonFungibleTokenInfo(address token, int64 serialNumber)
@@ -169,7 +193,9 @@ abstract contract SafeViewHTS {
         (responseCode, nonFungibleTokenInfo) = success
             ? abi.decode(result, (int32, IHederaTokenService.NonFungibleTokenInfo))
             : (HederaResponseCodes.UNKNOWN, nonFungibleTokenInfo);
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetNonFungibleTokenInfoFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetNonFungibleTokenInfoFailed();
+        }
     }
 
     function safeIsToken(address token) internal returns (bool isToken) {
@@ -186,7 +212,9 @@ abstract contract SafeViewHTS {
             precompileAddress.call(abi.encodeWithSelector(IHederaTokenService.getTokenType.selector, token));
         (responseCode, tokenType) =
             success ? abi.decode(result, (int32, int32)) : (HederaResponseCodes.UNKNOWN, int32(0));
-        if (responseCode != HederaResponseCodes.SUCCESS) revert GetTokenTypeFailed();
+        if (responseCode != HederaResponseCodes.SUCCESS) {
+            revert GetTokenTypeFailed();
+        }
     }
 
     function tryDecodeSuccessResponseCode(bool success, bytes memory result) private pure returns (bool) {
