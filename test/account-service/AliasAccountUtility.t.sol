@@ -55,11 +55,11 @@ contract AliasAccountUtilityTest is BaseTest {
     }
 
     function test_IsValidAliasPublic() public {
-        // HederaAccountService raw return for isValidAlias only decodes the bool
+        // HederaAccountService try/catch returns (int64, bool) per the interface
         vm.mockCall(
             HAS_PRECOMPILE,
             abi.encodeWithSelector(IHederaAccountService.isValidAlias.selector, ACCOUNT_NUM_ALIAS),
-            abi.encode(true)
+            abi.encode(TX_SUCCESS_CODE, true)
         );
         vm.recordLogs();
         (int64 responseCode, bool isValid) = aliasUtility.isValidAliasPublic(ACCOUNT_NUM_ALIAS);
@@ -75,13 +75,13 @@ contract AliasAccountUtilityTest is BaseTest {
     function test_IsAuthorizedRawPublic() public {
         bytes memory messageHash = "hash";
         bytes memory signature = "sig";
-        // HederaAccountService raw return for isAuthorizedRaw only decodes the bool
+        // HederaAccountService try/catch returns (int64, bool) per the interface
         vm.mockCall(
             HAS_PRECOMPILE,
             abi.encodeWithSelector(
                 IHederaAccountService.isAuthorizedRaw.selector, ACCOUNT_NUM_ALIAS, messageHash, signature
             ),
-            abi.encode(true)
+            abi.encode(TX_SUCCESS_CODE, true)
         );
         vm.recordLogs();
         (int64 responseCode, bool authorized) =

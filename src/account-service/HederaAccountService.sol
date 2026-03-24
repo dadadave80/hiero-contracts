@@ -2,11 +2,11 @@
 pragma solidity >=0.5.0 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import "../common/HederaResponseCodes.sol";
-import "./IHederaAccountService.sol";
+import {HederaResponseCodes} from "hiero-contracts/common/HederaResponseCodes.sol";
+import {IHederaAccountService} from "hiero-contracts/account-service/IHederaAccountService.sol";
 
 abstract contract HederaAccountService {
-    address constant HASPrecompileAddress = address(0x16a);
+    address constant HAS_PRECOMPILE = address(0x16a);
 
     /// Returns the amount of hbars that the spender has been authorized to spend on behalf of the owner.
     /// @param owner The account that has authorized the spender
@@ -14,11 +14,13 @@ abstract contract HederaAccountService {
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     /// @return amount The amount of hbar that the spender has been authorized to spend on behalf of the owner.
     function hbarAllowance(address owner, address spender) internal returns (int64 responseCode, int256 amount) {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.hbarAllowance.selector, owner, spender)
-        );
-        (responseCode, amount) =
-            success ? abi.decode(result, (int32, int256)) : (HederaResponseCodes.UNKNOWN, (int256)(0));
+        try IHederaAccountService(HAS_PRECOMPILE).hbarAllowance(owner, spender) returns (
+            int64 responseCode_, int256 amount_
+        ) {
+            return (responseCode_, amount_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, (int256)(0));
+        }
     }
 
     /// Allows spender to withdraw hbars from the owner account multiple times, up to the value amount. If this function is called
@@ -28,10 +30,11 @@ abstract contract HederaAccountService {
     /// @param amount the amount of hbars authorized to spend.
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     function hbarApprove(address owner, address spender, int256 amount) internal returns (int64 responseCode) {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.hbarApprove.selector, owner, spender, amount)
-        );
-        responseCode = success ? abi.decode(result, (int32)) : HederaResponseCodes.UNKNOWN;
+        try IHederaAccountService(HAS_PRECOMPILE).hbarApprove(owner, spender, amount) returns (int64 responseCode_) {
+            return responseCode_;
+        } catch {
+            return HederaResponseCodes.UNKNOWN;
+        }
     }
 
     /// Returns the EVM address alias for a given Hedera account.
@@ -48,11 +51,13 @@ abstract contract HederaAccountService {
         internal
         returns (int64 responseCode, address evmAddressAlias)
     {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.getEvmAddressAlias.selector, accountNumAlias)
-        );
-        (responseCode, evmAddressAlias) =
-            success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
+        try IHederaAccountService(HAS_PRECOMPILE).getEvmAddressAlias(accountNumAlias) returns (
+            int64 responseCode_, address evmAddressAlias_
+        ) {
+            return (responseCode_, evmAddressAlias_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, address(0));
+        }
     }
 
     /// Returns the Hedera Account ID (as account num alias) for the given EVM address alias
@@ -69,11 +74,13 @@ abstract contract HederaAccountService {
         internal
         returns (int64 responseCode, address accountNumAlias)
     {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.getHederaAccountNumAlias.selector, evmAddressAlias)
-        );
-        (responseCode, accountNumAlias) =
-            success ? abi.decode(result, (int32, address)) : (HederaResponseCodes.UNKNOWN, address(0));
+        try IHederaAccountService(HAS_PRECOMPILE).getHederaAccountNumAlias(evmAddressAlias) returns (
+            int64 responseCode_, address accountNumAlias_
+        ) {
+            return (responseCode_, accountNumAlias_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, address(0));
+        }
     }
 
     /// Returns true iff a Hedera account num alias or EVM address alias.
@@ -81,10 +88,11 @@ abstract contract HederaAccountService {
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     /// @return response true iff addr is a Hedera account num alias or an EVM address alias (and false otherwise).
     function isValidAlias(address addr) internal returns (int64 responseCode, bool response) {
-        (bool success, bytes memory result) =
-            HASPrecompileAddress.call(abi.encodeWithSelector(IHederaAccountService.isValidAlias.selector, addr));
-        (responseCode, response) =
-            success ? (HederaResponseCodes.SUCCESS, abi.decode(result, (bool))) : (HederaResponseCodes.UNKNOWN, false);
+        try IHederaAccountService(HAS_PRECOMPILE).isValidAlias(addr) returns (int64 responseCode_, bool response_) {
+            return (responseCode_, response_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, false);
+        }
     }
 
     /// Determines if the signature is valid for the given message hash and account.
@@ -98,11 +106,13 @@ abstract contract HederaAccountService {
         internal
         returns (int64 responseCode, bool authorized)
     {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.isAuthorizedRaw.selector, account, messageHash, signature)
-        );
-        (responseCode, authorized) =
-            success ? (HederaResponseCodes.SUCCESS, abi.decode(result, (bool))) : (HederaResponseCodes.UNKNOWN, false);
+        try IHederaAccountService(HAS_PRECOMPILE).isAuthorizedRaw(account, messageHash, signature) returns (
+            int64 responseCode_, bool authorized_
+        ) {
+            return (responseCode_, authorized_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, false);
+        }
     }
 
     /// Determines if the signature is valid for the given message and account.
@@ -116,9 +126,12 @@ abstract contract HederaAccountService {
         internal
         returns (int64 responseCode, bool authorized)
     {
-        (bool success, bytes memory result) = HASPrecompileAddress.call(
-            abi.encodeWithSelector(IHederaAccountService.isAuthorized.selector, account, message, signature)
-        );
-        (responseCode, authorized) = success ? abi.decode(result, (int32, bool)) : (HederaResponseCodes.UNKNOWN, false);
+        try IHederaAccountService(HAS_PRECOMPILE).isAuthorized(account, message, signature) returns (
+            int64 responseCode_, bool authorized_
+        ) {
+            return (responseCode_, authorized_);
+        } catch {
+            return (HederaResponseCodes.UNKNOWN, false);
+        }
     }
 }

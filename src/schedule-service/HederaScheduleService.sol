@@ -14,9 +14,11 @@ abstract contract HederaScheduleService is IHederaScheduleService {
     /// @param schedule the address of the schedule transaction.
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     function authorizeSchedule(address schedule) internal returns (int64 responseCode) {
-        (bool success, bytes memory result) =
-            HSS.call(abi.encodeWithSelector(IHRC755.authorizeSchedule.selector, schedule));
-        responseCode = success ? abi.decode(result, (int64)) : HederaResponseCodes.UNKNOWN;
+        try IHRC755(HSS).authorizeSchedule(schedule) returns (int64 responseCode_) {
+            return responseCode_;
+        } catch {
+            return HederaResponseCodes.UNKNOWN;
+        }
     }
 
     /// Allows for the signing of a schedule transaction given a protobuf encoded signature map
@@ -25,9 +27,11 @@ abstract contract HederaScheduleService is IHederaScheduleService {
     /// @param signatureMap the protobuf encoded signature map
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     function signSchedule(address schedule, bytes memory signatureMap) internal returns (int64 responseCode) {
-        (bool success, bytes memory result) =
-            HSS.call(abi.encodeWithSelector(IHRC755.signSchedule.selector, schedule, signatureMap));
-        responseCode = success ? abi.decode(result, (int64)) : HederaResponseCodes.UNKNOWN;
+        try IHRC755(HSS).signSchedule(schedule, signatureMap) returns (int64 responseCode_) {
+            return responseCode_;
+        } catch {
+            return HederaResponseCodes.UNKNOWN;
+        }
     }
 
     /// Allows for the creation of a schedule transaction for given a system contract address, abi encoded call data and payer address
@@ -43,11 +47,13 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         internal
         returns (int64 responseCode, address scheduleAddress)
     {
-        (bool success, bytes memory result) = HSS.call(
-            abi.encodeWithSelector(IHRC756.scheduleNative.selector, systemContractAddress, callData, payer)
-        );
-        (responseCode, scheduleAddress) =
-            success ? abi.decode(result, (int64, address)) : (int64(HederaResponseCodes.UNKNOWN), address(0));
+        try IHRC756(HSS).scheduleNative(systemContractAddress, callData, payer) returns (
+            int64 responseCode_, address scheduleAddress_
+        ) {
+            return (responseCode_, scheduleAddress_);
+        } catch {
+            return (int64(HederaResponseCodes.UNKNOWN), address(0));
+        }
     }
 
     /// Returns the token information for a scheduled fungible token create transaction
@@ -58,12 +64,14 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         internal
         returns (int64 responseCode, IHederaTokenService.FungibleTokenInfo memory fungibleTokenInfo)
     {
-        (bool success, bytes memory result) =
-            HSS.call(abi.encodeWithSelector(IHRC756.getScheduledCreateFungibleTokenInfo.selector, scheduleAddress));
-        IHederaTokenService.FungibleTokenInfo memory defaultTokenInfo;
-        (responseCode, fungibleTokenInfo) = success
-            ? abi.decode(result, (int64, IHederaTokenService.FungibleTokenInfo))
-            : (int64(HederaResponseCodes.UNKNOWN), defaultTokenInfo);
+        try IHRC756(HSS).getScheduledCreateFungibleTokenInfo(scheduleAddress) returns (
+            int64 responseCode_, IHederaTokenService.FungibleTokenInfo memory fungibleTokenInfo_
+        ) {
+            return (responseCode_, fungibleTokenInfo_);
+        } catch {
+            IHederaTokenService.FungibleTokenInfo memory defaultTokenInfo;
+            return (int64(HederaResponseCodes.UNKNOWN), defaultTokenInfo);
+        }
     }
 
     /// Returns the token information for a scheduled non fungible token create transaction
@@ -74,12 +82,14 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         internal
         returns (int64 responseCode, IHederaTokenService.NonFungibleTokenInfo memory nonFungibleTokenInfo)
     {
-        (bool success, bytes memory result) =
-            HSS.call(abi.encodeWithSelector(IHRC756.getScheduledCreateNonFungibleTokenInfo.selector, scheduleAddress));
-        IHederaTokenService.NonFungibleTokenInfo memory defaultTokenInfo;
-        (responseCode, nonFungibleTokenInfo) = success
-            ? abi.decode(result, (int64, IHederaTokenService.NonFungibleTokenInfo))
-            : (int64(HederaResponseCodes.UNKNOWN), defaultTokenInfo);
+        try IHRC756(HSS).getScheduledCreateNonFungibleTokenInfo(scheduleAddress) returns (
+            int64 responseCode_, IHederaTokenService.NonFungibleTokenInfo memory nonFungibleTokenInfo_
+        ) {
+            return (responseCode_, nonFungibleTokenInfo_);
+        } catch {
+            IHederaTokenService.NonFungibleTokenInfo memory defaultTokenInfo;
+            return (int64(HederaResponseCodes.UNKNOWN), defaultTokenInfo);
+        }
     }
 
     /// Allows for the creation of a schedule transaction to schedule any contract call for a given smart contract
@@ -98,11 +108,13 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         internal
         returns (int64 responseCode, address scheduleAddress)
     {
-        (bool success, bytes memory result) = HSS.call(
-            abi.encodeWithSelector(IHRC1215.scheduleCall.selector, to, expirySecond, gasLimit, value, callData)
-        );
-        (responseCode, scheduleAddress) =
-            success ? abi.decode(result, (int64, address)) : (int64(HederaResponseCodes.UNKNOWN), address(0));
+        try IHRC1215(HSS).scheduleCall(to, expirySecond, gasLimit, value, callData) returns (
+            int64 responseCode_, address scheduleAddress_
+        ) {
+            return (responseCode_, scheduleAddress_);
+        } catch {
+            return (int64(HederaResponseCodes.UNKNOWN), address(0));
+        }
     }
 
     /// Allows for the creation of a schedule transaction to schedule any contract call for a given smart contract
@@ -129,13 +141,13 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         uint64 value,
         bytes memory callData
     ) internal returns (int64 responseCode, address scheduleAddress) {
-        (bool success, bytes memory result) = HSS.call(
-            abi.encodeWithSelector(
-                IHRC1215.scheduleCallWithPayer.selector, to, payer, expirySecond, gasLimit, value, callData
-            )
-        );
-        (responseCode, scheduleAddress) =
-            success ? abi.decode(result, (int64, address)) : (int64(HederaResponseCodes.UNKNOWN), address(0));
+        try IHRC1215(HSS).scheduleCallWithPayer(to, payer, expirySecond, gasLimit, value, callData) returns (
+            int64 responseCode_, address scheduleAddress_
+        ) {
+            return (responseCode_, scheduleAddress_);
+        } catch {
+            return (int64(HederaResponseCodes.UNKNOWN), address(0));
+        }
     }
 
     /// Allows for the creation of a schedule transaction to schedule any contract call for a given smart contract
@@ -163,22 +175,24 @@ abstract contract HederaScheduleService is IHederaScheduleService {
         uint64 value,
         bytes memory callData
     ) internal returns (int64 responseCode, address scheduleAddress) {
-        (bool success, bytes memory result) = HSS.call(
-            abi.encodeWithSelector(
-                IHRC1215.executeCallOnPayerSignature.selector, to, payer, expirySecond, gasLimit, value, callData
-            )
-        );
-        (responseCode, scheduleAddress) =
-            success ? abi.decode(result, (int64, address)) : (int64(HederaResponseCodes.UNKNOWN), address(0));
+        try IHRC1215(HSS).executeCallOnPayerSignature(to, payer, expirySecond, gasLimit, value, callData) returns (
+            int64 responseCode_, address scheduleAddress_
+        ) {
+            return (responseCode_, scheduleAddress_);
+        } catch {
+            return (int64(HederaResponseCodes.UNKNOWN), address(0));
+        }
     }
 
     /// Delete the targeted schedule transaction.
     /// @param scheduleAddress the address of the schedule transaction.
     /// @return responseCode The response code for the status of the request. SUCCESS is 22.
     function deleteSchedule(address scheduleAddress) internal returns (int64 responseCode) {
-        (bool success, bytes memory result) =
-            HSS.call(abi.encodeWithSelector(IHRC1215.deleteSchedule.selector, scheduleAddress));
-        responseCode = success ? abi.decode(result, (int64)) : HederaResponseCodes.UNKNOWN;
+        try IHRC1215(HSS).deleteSchedule(scheduleAddress) returns (int64 responseCode_) {
+            return responseCode_;
+        } catch {
+            return HederaResponseCodes.UNKNOWN;
+        }
     }
 
     /// Allows to check if the given second still has capacity to schedule a contract call with the specified gas limit.
@@ -187,8 +201,10 @@ abstract contract HederaScheduleService is IHederaScheduleService {
     /// @return hasCapacity returns `true` iff the given second still has capacity to schedule a contract call
     /// with the specified gas limit.
     function hasScheduleCapacity(uint256 expirySecond, uint256 gasLimit) internal view returns (bool hasCapacity) {
-        (bool success, bytes memory result) =
-            HSS.staticcall(abi.encodeWithSelector(IHRC1215.hasScheduleCapacity.selector, expirySecond, gasLimit));
-        hasCapacity = success ? abi.decode(result, (bool)) : false;
+        try IHRC1215(HSS).hasScheduleCapacity(expirySecond, gasLimit) returns (bool hasCapacity_) {
+            return hasCapacity_;
+        } catch {
+            return false;
+        }
     }
 }
