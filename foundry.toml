@@ -2,6 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+optimizer_runs = 999_999
 
 remappings = ["hiero-contracts/=src/"]
 
