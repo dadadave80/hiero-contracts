@@ -1,7 +1,6 @@
 node_modules
 cache
 .idea
-.env
 test-results.*
 
 # Ignore all default artifacts except for TokenCreateCustomContract, TokenManagementContract, TokenQueryContract, TokenTransferContract, IHRC729Contract, PrngSystemContract, ERC20Mock, ERC721Mock
@@ -20,3 +19,17 @@ artifacts/contracts/token-service/*
 coverage.json
 coverage
 contracts-abi
+
+# Foundry
+# Compiler files
+cache/
+out/
+
+# Ignores all broadcast logs
+/broadcast
+
+# Docs
+docs/
+
+# Dotenv file
+.env
